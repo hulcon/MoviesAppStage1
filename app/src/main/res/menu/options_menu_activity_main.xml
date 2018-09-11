@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:title="@string/sort_movies_by_popularity"
+        android:icon="@drawable/ic_thumb_up_black_24dp"
+        android:orderInCategory="1"
+        app:showAsAction="ifRoom"
+        android:id="@+id/action_sort_movies_by_popularity" />
+
+    <item
+        android:title="@string/sort_movies_by_rating"
+        android:icon="@drawable/ic_star_black_24dp"
+        android:orderInCategory="2"
+        app:showAsAction="ifRoom"
+        android:id="@+id/action_sort_movies_by_rating" />
+
+</menu>

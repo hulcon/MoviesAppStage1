@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/movie_detail_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".MovieDetail">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/movie_detail_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/app_bar_height"
+        android:fitsSystemWindows="true"
+        android:theme="@style/ThemeOverlay.AppCompat.ActionBar">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/movie_detail_collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark"
+            app:contentScrim="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <ImageView
+                android:id="@+id/movie_backdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true"
+                android:scaleType="centerCrop"
+                app:layout_collapseMode="parallax" />
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/movie_detail_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nested_Scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- This extra constraintlayout helps to hide all the widgets easily while
+                 the movie details are loading -->
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/constraint_layout_movie_details"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:id="@+id/imageview_movie_poster"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:id="@+id/textview_movie_title_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="@string/movie_title_label"
+                    app:layout_constraintStart_toEndOf="@id/imageview_movie_poster"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:layout_marginStart="8dp"/>
+
+                <TextView
+                    android:id="@+id/textview_movie_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/textview_movie_title_label"
+                    app:layout_constraintStart_toStartOf="@id/textview_movie_title_label"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
+                    android:id="@+id/textview_release_date_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="@string/movie_release_date_label"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/textview_movie_title"
+                    app:layout_constraintStart_toStartOf="@id/textview_movie_title"/>
+
+                <TextView
+                    android:id="@+id/textview_release_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/textview_release_date_label"
+                    app:layout_constraintStart_toStartOf="@id/textview_release_date_label"/>
+
+                <TextView
+                    android:id="@+id/textview_rating_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/movie_rating_label"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/textview_release_date"
+                    app:layout_constraintStart_toStartOf="@id/textview_release_date"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBar_movie_rating"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="10"
+                    android:rating="3"
+                    app:layout_constraintStart_toStartOf="@id/textview_rating_label"
+                    app:layout_constraintTop_toBottomOf="@id/textview_rating_label" />
+
+                <TextView
+                    android:id="@+id/textview_rating_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/ratingBar_movie_rating"
+                    app:layout_constraintTop_toBottomOf="@id/ratingBar_movie_rating"/>
+
+                <TextView
+                    android:id="@+id/textview_overview_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/movie_overview_label"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/imageview_movie_poster"
+                    app:layout_constraintStart_toStartOf="@id/imageview_movie_poster"/>
+
+                <TextView
+                    android:id="@+id/textview_plot_synopsis"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/textview_overview_label"
+                    app:layout_constraintStart_toStartOf="@id/textview_overview_label"/>
+            </android.support.constraint.ConstraintLayout>
+
+            <ProgressBar
+                android:id="@+id/movie_detail_progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:minHeight="120dp"
+                android:minWidth="120dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/textView_loading_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/movie_details_loading_message"
+                android:textSize="20sp"
+                app:layout_constraintEnd_toEndOf="@id/movie_detail_progressBar"
+                app:layout_constraintStart_toStartOf="@id/movie_detail_progressBar"
+                app:layout_constraintTop_toBottomOf="@id/movie_detail_progressBar"
+                android:visibility="gone"/>
+        </android.support.constraint.ConstraintLayout>
+
+    </android.support.v4.widget.NestedScrollView>
+
+
+</android.support.design.widget.CoordinatorLayout>
