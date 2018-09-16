@@ -1,6 +1,9 @@
 package com.example.irshad.moviesappstage1.Models;
 
-public class Movie {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Movie implements Parcelable {
     private String id;
     private String title;
     private double rating;
@@ -10,6 +13,10 @@ public class Movie {
     private String originalTitle;
     private String movieOverview;
     private String releaseDate;
+
+    public Movie() {
+
+    }
 
     public String getTitle() {
         return title;
@@ -83,4 +90,46 @@ public class Movie {
         this.releaseDate = releaseDate;
     }
 
+    public Movie(Parcel parcel){
+        id = parcel.readString();
+        title = parcel.readString();
+        rating = parcel.readDouble();
+        popularity = parcel.readDouble();
+        thumbnailPath = parcel.readString();
+        backdropPath = parcel.readString();
+        originalTitle = parcel.readString();
+        movieOverview = parcel.readString();
+        releaseDate = parcel.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeDouble(rating);
+        dest.writeDouble(popularity);
+        dest.writeString(thumbnailPath);
+        dest.writeString(backdropPath);
+        dest.writeString(originalTitle);
+        dest.writeString(movieOverview);
+        dest.writeString(releaseDate);
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>(){
+
+        @Override
+        public Movie createFromParcel(Parcel source) {
+            return new Movie(source);
+        }
+
+        @Override
+        public Movie[] newArray(int size) {
+            return new Movie[0];
+        }
+    };
 }

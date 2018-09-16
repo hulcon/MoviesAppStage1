@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 movie.setMovieOverview(result.getString("overview"));
                 movie.setOriginalTitle(result.getString("original_title"));
                 movie.setId(result.getString("id"));
+                movie.setReleaseDate(result.getString("release_date"));
                 movieArrayList.add(movie);
             }
         } catch (JSONException e) {

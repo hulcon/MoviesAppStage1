@@ -18,6 +18,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
+    public static final String EXTRA_MOVIE = "movie";
     private static final String TAG = "MovieAdapter";
     private final ArrayList<Movie> movieArrayList;
     private LayoutInflater mInflater;
@@ -84,7 +85,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         public void onClick(View v) {
             Context context = v.getContext();
             Intent intent = new Intent(context, MovieDetail.class);
-            intent.putExtra(MovieDetail.EXTRA_MOVIE_ID,movieArrayList.get(getAdapterPosition()).getId());
+
+            /*
+              Pass the whole Movie object to the detail activity so that separate
+              network call is not needed to fetch the movie details in the
+              movie detail activity. It will work as i have implemented the
+              parcelable in the {@link Movie} class.
+             */
+            intent.putExtra(EXTRA_MOVIE,movieArrayList.get(getAdapterPosition()));
             context.startActivity(intent);
         }
     }
