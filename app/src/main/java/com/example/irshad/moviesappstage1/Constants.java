@@ -10,4 +10,11 @@ public class Constants {
     public static final String SORT_ORDER_POPULAR = "popular";
     public static final String SORT_ORDER_TOP_RATED = "top_rated";
     public static final String DEFAULT_SORT_ORDER = SORT_ORDER_POPULAR;
+    public static final String TRAILER_ENDPOINT = "videos";
+    public static final String REVIEWS_ENDPOINT = "reviews";
+    public static final String QUERY_PARAM_LANGUAGE = "language";
+    public static final String DEFAULT_API_LANGUAGE_PARAMETER = "en-US";
+    public static final String YOUTUBE_BASE_URL = "https://www.youtube.com";
+    public static final String YOUTUBE_WATCH_ENDPOINT = "watch";
+    public static final String YOUTUBE_QUERY_PARAM = "v";
 }

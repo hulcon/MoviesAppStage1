@@ -16,4 +16,8 @@
     <string name="movie_overview_label">Overview</string>
     <string name="movie_rating_label">Rating</string>
     <string name="movie_details_loading_message">Loading Details, Please Wait...</string>
+    <string name="trailers_label">Trailers</string>
+    <string name="reviews_label">Reviews</string>
+    <string name="no_reviews_available">No reviews available</string>
+    <string name="no_trailers_available">No trailers available</string>
 </resources>

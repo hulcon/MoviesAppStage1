@@ -25,6 +25,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.irshad.moviesappstage1.Models.Movie;
+import com.example.irshad.moviesappstage1.Utils.NetworkUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         /* Check Internet connectivity first. Proceed with network request only if the
          * device is connected to the Internet. Otherwise, display an error message
          */
-        if(isOnline()){
+        if(NetworkUtils.isOnline(this)){
             /* Device is connected to the Internet, proceed with the network request*/
             sendNetworkRequest(sortOrder);
 
@@ -180,20 +181,7 @@ public class MainActivity extends AppCompatActivity {
         queue.add(stringRequest);
     }
 
-    /**
-     * This method checks whether the device is connected to the Internet
-     * or not.
-     * @return boolean value true or false
-     */
-    public boolean isOnline() {
-        ConnectivityManager connMgr = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = null;
-        if (connMgr != null) {
-            networkInfo = connMgr.getActiveNetworkInfo();
-        }
-        return (networkInfo != null && networkInfo.isConnected());
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

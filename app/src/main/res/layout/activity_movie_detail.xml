@@ -68,8 +68,8 @@
 
                 <ImageView
                     android:id="@+id/imageview_movie_poster"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="120dp"
+                    android:layout_height="150dp"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"/>
 
@@ -151,6 +151,56 @@
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/textview_overview_label"
                     app:layout_constraintStart_toStartOf="@id/textview_overview_label"/>
+
+                <TextView
+                    android:id="@+id/textview_trailers_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/trailers_label"
+                    app:layout_constraintTop_toBottomOf="@id/textview_plot_synopsis"
+                    app:layout_constraintStart_toStartOf="@id/textview_plot_synopsis"/>
+
+                <HorizontalScrollView
+                    android:id="@+id/horizontal_scroll_view_movie_trailers"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="@id/textview_trailers_label"
+                    app:layout_constraintTop_toBottomOf="@id/textview_trailers_label">
+
+                    <LinearLayout
+                        android:id="@+id/linear_layout_trailers_main"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+
+                    </LinearLayout>
+
+                </HorizontalScrollView>
+
+                <TextView
+                    android:id="@+id/textview_reviews_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/reviews_label"
+                    app:layout_constraintTop_toBottomOf="@id/horizontal_scroll_view_movie_trailers"
+                    app:layout_constraintStart_toStartOf="@id/horizontal_scroll_view_movie_trailers"/>
+
+                <LinearLayout
+                    android:id="@+id/linear_layout_reviews_main"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    app:layout_constraintStart_toStartOf="@id/textview_reviews_label"
+                    app:layout_constraintTop_toBottomOf="@id/textview_reviews_label">
+
+                </LinearLayout>
+
             </android.support.constraint.ConstraintLayout>
 
             <ProgressBar
@@ -176,6 +226,8 @@
                 app:layout_constraintStart_toStartOf="@id/movie_detail_progressBar"
                 app:layout_constraintTop_toBottomOf="@id/movie_detail_progressBar"
                 android:visibility="gone"/>
+
+
         </android.support.constraint.ConstraintLayout>
 
     </android.support.v4.widget.NestedScrollView>
