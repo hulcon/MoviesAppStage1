@@ -5,6 +5,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -24,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.irshad.moviesappstage1.Database.AppDatabase;
 import com.example.irshad.moviesappstage1.Models.Movie;
 import com.example.irshad.moviesappstage1.Utils.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -37,6 +39,8 @@ public class MovieDetail extends AppCompatActivity {
 
     public static final String EXTRA_MOVIE_ID = "id";
     private final String  TAG = "MovieDetail";
+    private FloatingActionButton floatingActionButton;
+    private AppDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +51,10 @@ public class MovieDetail extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(" ");
         /* Get Movie details from the parcelable extra "movie" object */
-        Movie movie = getIntent().getParcelableExtra(MovieAdapter.EXTRA_MOVIE);
+        final Movie movie = getIntent().getParcelableExtra(MovieAdapter.EXTRA_MOVIE);
         displayMovieDetails(movie);
+
+        mDb = AppDatabase.getsInstance(getApplicationContext());
 
         /* If the device is online, try to fetch the trailers*/
         if(NetworkUtils.isOnline(this)){
@@ -58,6 +64,53 @@ public class MovieDetail extends AppCompatActivity {
             //Display a message showing the device is offline
             Toast.makeText(this, "Trailers and Reviews not available as your device is offline", Toast.LENGTH_SHORT).show();
         }
+
+        floatingActionButton = findViewById(R.id.fab_movie_detail);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Write code here to add movie to the favourites
+                saveMovieAsFavourite(movie);
+            }
+        });
+    }
+
+    private void saveMovieAsFavourite(final Movie movie) {
+        AppExecutors.getsInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                /* Check if the movie already exists in the favourites database.
+                 * If it already exists then remove it from the favourites,
+                 * otherwise insert it into the database.
+                 */
+                int movieCount = mDb.movieDao().getMovieCount(movie.getId());
+                if(movieCount<1){
+                    /* Add movie to the favourites */
+                    mDb.movieDao().insertFavouriteMovie(movie);
+                    Log.d(TAG, "Movie added to favourites");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MovieDetail.this, "Added to favourites", Toast.LENGTH_SHORT).show();
+                            floatingActionButton.setImageResource(R.drawable.ic_favorite_border);
+                        }
+                    });
+
+                } else {
+                    /* Remove movie from the favourites */
+                    mDb.movieDao().deleteFavouriteMovie(movie);
+                    Log.d(TAG,"Movie removed from favourites");
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MovieDetail.this, "Removed from favourites", Toast.LENGTH_SHORT).show();
+                            floatingActionButton.setImageResource(R.drawable.ic_favorite);
+                        }
+                    });
+                }
+
+            }
+        });
     }
 
     /**

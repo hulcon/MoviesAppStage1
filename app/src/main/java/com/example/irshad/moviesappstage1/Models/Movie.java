@@ -1,9 +1,16 @@
 package com.example.irshad.moviesappstage1.Models;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
+@Entity(tableName = "favmovies")
 public class Movie implements Parcelable {
+    @PrimaryKey
+    @NonNull
     private String id;
     private String title;
     private double rating;
@@ -14,6 +21,34 @@ public class Movie implements Parcelable {
     private String movieOverview;
     private String releaseDate;
 
+    /* Constructor with id */
+    public Movie(String id, String title, double rating, double popularity, String thumbnailPath, String backdropPath, String originalTitle, String movieOverview, String releaseDate) {
+        this.id = id;
+        this.title = title;
+        this.rating = rating;
+        this.popularity = popularity;
+        this.thumbnailPath = thumbnailPath;
+        this.backdropPath = backdropPath;
+        this.originalTitle = originalTitle;
+        this.movieOverview = movieOverview;
+        this.releaseDate = releaseDate;
+    }
+
+    @Ignore
+    /* Constructor without id */
+    public Movie(String title, double rating, double popularity, String thumbnailPath, String backdropPath, String originalTitle, String movieOverview, String releaseDate) {
+        this.title = title;
+        this.rating = rating;
+        this.popularity = popularity;
+        this.thumbnailPath = thumbnailPath;
+        this.backdropPath = backdropPath;
+        this.originalTitle = originalTitle;
+        this.movieOverview = movieOverview;
+        this.releaseDate = releaseDate;
+    }
+
+    @Ignore
+    /* Empty Constructor */
     public Movie() {
 
     }
@@ -90,6 +125,7 @@ public class Movie implements Parcelable {
         this.releaseDate = releaseDate;
     }
 
+    @Ignore
     public Movie(Parcel parcel){
         id = parcel.readString();
         title = parcel.readString();
