@@ -44,7 +44,7 @@ import java.util.List;
 
 public class MovieDetail extends AppCompatActivity {
 
-    //public static final String EXTRA_MOVIE_ID = "id";
+
     private static final int UNDECIDED = -1;
     private static final int FAVOURITE_MOVIE = 1;
     private static final int NOT_FAVOURITE_MOVIE = 2;
@@ -97,6 +97,14 @@ public class MovieDetail extends AppCompatActivity {
 
     }
 
+    /**
+     * This method updates the drawable of floating action button according
+     * to whether the movie is a favourite or not. If the movie is a favourite
+     * one then it sets the FAB drawable as a solid heart icon. If the movie
+     * is not a favourite one then the FAB drawable is set as an outline heart
+     * icon.
+     * @param favouriteFlag Flag denoting whether the movie is favourite or not
+     */
     private void updateFavButton(int favouriteFlag){
         if(favouriteFlag == UNDECIDED){
             floatingActionButton.setEnabled(false);
@@ -110,6 +118,11 @@ public class MovieDetail extends AppCompatActivity {
     }
 
 
+    /**
+     * This method sets up the view model and observer for monitoring
+     * addition or deletion of a movie to the favourites database and
+     * accordingly updates a flag
+     */
     private void setUpViewModel() {
         AllMoviesViewModel allMoviesViewModel = ViewModelProviders.of(this).get(AllMoviesViewModel.class);
         allMoviesViewModel.getMovieList().observe(this, new Observer<List<Movie>>() {
@@ -140,6 +153,14 @@ public class MovieDetail extends AppCompatActivity {
         });
     }
 
+    /**
+     * This method adds or removes a movie to the favourites database.
+     * It uses a flag to determine whether the movie is already in
+     * the favourites database or not. If it is already in the
+     * favourites list then it removes it from the local database. If the
+     * movie is not in the list then it adds it to the local database.
+     * @param movie
+     */
     private void saveMovieAsFavourite(final Movie movie) {
         AppExecutors.getsInstance().diskIO().execute(new Runnable() {
             @Override
@@ -152,27 +173,10 @@ public class MovieDetail extends AppCompatActivity {
                     /* Add movie to the favourites */
                     mDb.movieDao().insertFavouriteMovie(movie);
                     Log.d(TAG, "Movie added to favourites");
-                    /*
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MovieDetail.this, "Added to favourites", Toast.LENGTH_SHORT).show();
-                            floatingActionButton.setImageResource(R.drawable.ic_favorite_border);
-                        }
-                    });*/
-
                 } else if(movieFavouriteFlag == FAVOURITE_MOVIE) {
                     /* Remove movie from the favourites */
                     mDb.movieDao().deleteFavouriteMovie(movie);
                     Log.d(TAG,"Movie removed from favourites");
-                    /*
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MovieDetail.this, "Removed from favourites", Toast.LENGTH_SHORT).show();
-                            floatingActionButton.setImageResource(R.drawable.ic_favorite);
-                        }
-                    }); */
                 }
 
             }

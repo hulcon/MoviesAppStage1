@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
         if(savedInstanceState != null) {
             currentSortOrder = savedInstanceState.getString(Constants.SORT_ORDER_KEY_FOR_STATE_RESTORATION);
         }
+
+        /* Set the appropriate title according to the sort order */
         String titleString;
         switch (currentSortOrder) {
             case Constants.SORT_ORDER_POPULAR:
@@ -85,6 +87,11 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(titleString);
         setUpViewModel();
+
+        /* For Sort Orders Popular and Top Rated, we get the movie list from
+         * the Movie Database Server. For Favourite Movies, we load the list
+         * from local database (Room)
+         */
         if(savedInstanceState != null){
             switch (currentSortOrder){
                 case Constants.SORT_ORDER_POPULAR:
@@ -271,6 +278,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    /**
+     * This method is used to set up the view model and the observer
+     * for the list of favourite movies
+     */
     private void setUpViewModel() {
         AllMoviesViewModel allMoviesViewModel = ViewModelProviders.of(this).get(AllMoviesViewModel.class);
         allMoviesViewModel.getMovieList().observe(this, new Observer<List<Movie>>() {
@@ -288,6 +300,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * This method creates a separate copy of the favourite movies and
+     * copies all the movies element by element into the movieArrayList
+     * which is used by the recyclerview adapter to display the movies
+     * in a grid
+     * @param movieList List of movies obtained through view model
+     */
     private void copyFavouriteMovieListToMovieArrayList(List<Movie> movieList){
         if(movieList == null){
             return;
@@ -310,6 +330,15 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG,"Copied " + i + " items from favourites list to movie list for adapter");
     }
 
+
+    /**
+     * This method creates a copy of the list of favourite movies loaded from
+     * the local database into a temporary array list. The reason for using
+     * this extra temporary list is that i am not using separate fragments to
+     * handle different sort orders. Therefore, i am using this temporary
+     * arraylist to readily hold the updated favourites movie list
+     * @param movieList Favourites movie list obtained through view model
+     */
     private void copyFavouriteMovieListToFavouriteMovieArrayListTemp(List<Movie> movieList){
         if(movieList == null){
             return;
@@ -332,6 +361,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG,"Copied " + i + " items from favourites list to temp list");
     }
 
+    /**
+     * This method simply copies the contents of temporary favourite movies array list
+     * to the main array list used by the recycler view for displaying in grid
+     */
     private void copyTempListToAdapterList(){
         if(favouriteMovieArrayListTemp == null){
             return;
