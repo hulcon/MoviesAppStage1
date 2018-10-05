@@ -1,9 +1,12 @@
 package com.example.irshad.moviesappstage1;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -32,17 +35,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import static com.example.irshad.moviesappstage1.Constants.API_KEY;
 
 public class MainActivity extends AppCompatActivity {
 
     private final String  TAG = "MainActivity";
     private ArrayList<Movie> movieArrayList = new ArrayList<>();
+    private ArrayList<Movie> favouriteMovieArrayListTemp = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private MovieAdapter movieAdapter;
     private ProgressBar mProgressBar;
     private TextView textViewLoadingMessage;
     private ImageView imageViewNoInternet;
-    private String currentSortOrder;
+    private String currentSortOrder = Constants.DEFAULT_SORT_ORDER;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,16 +67,39 @@ public class MainActivity extends AppCompatActivity {
         final int columns = getResources().getInteger(R.integer.movie_grid_columns);
         mRecyclerView.setLayoutManager(new GridLayoutManager(this,columns));
 
-        String titleString;
-        if(Constants.DEFAULT_SORT_ORDER.equals(Constants.SORT_ORDER_POPULAR)){
-            titleString = getResources().getString(R.string.sort_movies_by_popularity);
-        } else {
-            titleString = getResources().getString(R.string.sort_movies_by_rating);
+        if(savedInstanceState != null) {
+            currentSortOrder = savedInstanceState.getString(Constants.SORT_ORDER_KEY_FOR_STATE_RESTORATION);
         }
-        currentSortOrder = Constants.DEFAULT_SORT_ORDER;
-        //getSupportActionBar().setTitle(titleString);
+        String titleString;
+        switch (currentSortOrder) {
+            case Constants.SORT_ORDER_POPULAR:
+                titleString = getResources().getString(R.string.sort_movies_by_popularity);
+                break;
+            case Constants.SORT_ORDER_TOP_RATED:
+                titleString = getResources().getString(R.string.sort_movies_by_rating);
+                break;
+            default:
+                titleString = getResources().getString(R.string.my_favourite_movies);
+                break;
+        }
 
-        getMovieDataFromServerIntoRecyclerView(Constants.DEFAULT_SORT_ORDER);
+        getSupportActionBar().setTitle(titleString);
+        setUpViewModel();
+        if(savedInstanceState != null){
+            switch (currentSortOrder){
+                case Constants.SORT_ORDER_POPULAR:
+                case Constants.SORT_ORDER_TOP_RATED:
+                    getMovieDataFromServerIntoRecyclerView(currentSortOrder);
+                    break;
+                default:
+                    movieAdapter.clearAllData();
+                    copyTempListToAdapterList();
+                    movieAdapter.notifyDataSetChanged();
+                    break;
+            }
+        } else {
+            getMovieDataFromServerIntoRecyclerView(currentSortOrder);
+        }
     }
 
     /**
@@ -100,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
             /* Device is not connected to the Internet, display error message */
             imageViewNoInternet = findViewById(R.id.imageView_no_internet);
             imageViewNoInternet.setVisibility(View.VISIBLE);
+            mRecyclerView.setVisibility(View.GONE);
             Toast.makeText(this, "Not connected to Internet. Please connect to Internet first!", Toast.LENGTH_SHORT).show();
         }
     }
@@ -129,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 movie.setReleaseDate(result.getString("release_date"));
                 movieArrayList.add(movie);
             }
+            Log.d(TAG,"Total movies got is " + movieArrayList.size());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -202,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
                     movieAdapter.clearAllData();
                     /* Display new movie list in the recyclerview */
                     getMovieDataFromServerIntoRecyclerView(currentSortOrder);
+                    Log.d(TAG,"Current sort order is " + currentSortOrder);
                 }
                 break;
 
@@ -214,11 +247,123 @@ public class MainActivity extends AppCompatActivity {
                     movieAdapter.clearAllData();
                     /* Display new movie list in the recyclerview */
                     getMovieDataFromServerIntoRecyclerView(currentSortOrder);
+                    Log.d(TAG,"Current sort order is " + currentSortOrder);
+                }
+                break;
+
+            case R.id.action_sort_movies_by_favourites:
+                if(!currentSortOrder.equals(Constants.SORT_ORDER_MY_FAVOURITE_MOVIES)){
+                    mRecyclerView.setVisibility(View.VISIBLE);
+                    if(!NetworkUtils.isOnline(this)){
+                        imageViewNoInternet = findViewById(R.id.imageView_no_internet);
+                        imageViewNoInternet.setVisibility(View.INVISIBLE);
+                    }
+                    currentSortOrder = Constants.SORT_ORDER_MY_FAVOURITE_MOVIES;
+                    getSupportActionBar().setTitle(R.string.my_favourite_movies);
+                    Log.d(TAG,"Current sort order is " + currentSortOrder);
+                    movieAdapter.clearAllData();
+                    copyTempListToAdapterList();
+                    movieAdapter.notifyDataSetChanged();
                 }
                 break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setUpViewModel() {
+        AllMoviesViewModel allMoviesViewModel = ViewModelProviders.of(this).get(AllMoviesViewModel.class);
+        allMoviesViewModel.getMovieList().observe(this, new Observer<List<Movie>>() {
+            @Override
+            public void onChanged(@Nullable List<Movie> movies) {
+                Log.d(TAG,"Change triggered in Main Activity with movies " + movies.size());
+                copyFavouriteMovieListToFavouriteMovieArrayListTemp(movies);
+                if(Constants.SORT_ORDER_MY_FAVOURITE_MOVIES.equals(currentSortOrder)){
+                    movieAdapter.clearAllData();
+                    copyFavouriteMovieListToMovieArrayList(movies);
+                    movieAdapter.notifyDataSetChanged();
+                    Log.d(TAG,"Change with current sort order of Fav movies");
+                }
+            }
+        });
+    }
+
+    private void copyFavouriteMovieListToMovieArrayList(List<Movie> movieList){
+        if(movieList == null){
+            return;
+        }
+        int i;
+        movieArrayList.clear();
+        for(i=0;i<movieList.size();i++){
+            Movie movie = new Movie();
+            movie.setTitle(movieList.get(i).getTitle());
+            movie.setRating(movieList.get(i).getRating());
+            movie.setThumbnailPath(movieList.get(i).getThumbnailPath());
+            movie.setBackdropPath(movieList.get(i).getBackdropPath());
+            movie.setPopularity(movieList.get(i).getPopularity());
+            movie.setMovieOverview(movieList.get(i).getMovieOverview());
+            movie.setOriginalTitle(movieList.get(i).getOriginalTitle());
+            movie.setId(movieList.get(i).getId());
+            movie.setReleaseDate(movieList.get(i).getReleaseDate());
+            movieArrayList.add(movie);
+        }
+        Log.d(TAG,"Copied " + i + " items from favourites list to movie list for adapter");
+    }
+
+    private void copyFavouriteMovieListToFavouriteMovieArrayListTemp(List<Movie> movieList){
+        if(movieList == null){
+            return;
+        }
+        int i;
+        favouriteMovieArrayListTemp.clear();
+        for(i=0;i<movieList.size();i++){
+            Movie movie = new Movie();
+            movie.setTitle(movieList.get(i).getTitle());
+            movie.setRating(movieList.get(i).getRating());
+            movie.setThumbnailPath(movieList.get(i).getThumbnailPath());
+            movie.setBackdropPath(movieList.get(i).getBackdropPath());
+            movie.setPopularity(movieList.get(i).getPopularity());
+            movie.setMovieOverview(movieList.get(i).getMovieOverview());
+            movie.setOriginalTitle(movieList.get(i).getOriginalTitle());
+            movie.setId(movieList.get(i).getId());
+            movie.setReleaseDate(movieList.get(i).getReleaseDate());
+            favouriteMovieArrayListTemp.add(movie);
+        }
+        Log.d(TAG,"Copied " + i + " items from favourites list to temp list");
+    }
+
+    private void copyTempListToAdapterList(){
+        if(favouriteMovieArrayListTemp == null){
+            return;
+        }
+        int i;
+        movieArrayList.clear();
+        for(i=0;i<favouriteMovieArrayListTemp.size();i++){
+            Movie movie = new Movie();
+            movie.setTitle(favouriteMovieArrayListTemp.get(i).getTitle());
+            movie.setRating(favouriteMovieArrayListTemp.get(i).getRating());
+            movie.setThumbnailPath(favouriteMovieArrayListTemp.get(i).getThumbnailPath());
+            movie.setBackdropPath(favouriteMovieArrayListTemp.get(i).getBackdropPath());
+            movie.setPopularity(favouriteMovieArrayListTemp.get(i).getPopularity());
+            movie.setMovieOverview(favouriteMovieArrayListTemp.get(i).getMovieOverview());
+            movie.setOriginalTitle(favouriteMovieArrayListTemp.get(i).getOriginalTitle());
+            movie.setId(favouriteMovieArrayListTemp.get(i).getId());
+            movie.setReleaseDate(favouriteMovieArrayListTemp.get(i).getReleaseDate());
+            movieArrayList.add(movie);
+        }
+        Log.d(TAG,"Copied " + i + " items from temp list to adapter");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(Constants.SORT_ORDER_KEY_FOR_STATE_RESTORATION,currentSortOrder);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentSortOrder = savedInstanceState.getString(Constants.SORT_ORDER_KEY_FOR_STATE_RESTORATION);
     }
 }
 

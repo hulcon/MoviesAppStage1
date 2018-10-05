@@ -20,4 +20,5 @@
     <string name="reviews_label">Reviews</string>
     <string name="no_reviews_available">No reviews available</string>
     <string name="no_trailers_available">No trailers available</string>
+    <string name="my_favourite_movies">My Favourite Movies</string>
 </resources>

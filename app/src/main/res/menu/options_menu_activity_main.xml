@@ -15,4 +15,11 @@
         app:showAsAction="ifRoom"
         android:id="@+id/action_sort_movies_by_rating" />
 
+    <item
+        android:title="@string/my_favourite_movies"
+        android:icon="@drawable/ic_favorite"
+        android:orderInCategory="3"
+        app:showAsAction="ifRoom"
+        android:id="@+id/action_sort_movies_by_favourites" />
+
 </menu>
