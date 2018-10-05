@@ -1,9 +1,14 @@
 package com.example.irshad.moviesappstage1;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PersistableBundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -34,27 +39,51 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
+
 
 public class MovieDetail extends AppCompatActivity {
 
-    public static final String EXTRA_MOVIE_ID = "id";
+    //public static final String EXTRA_MOVIE_ID = "id";
+    private static final int UNDECIDED = -1;
+    private static final int FAVOURITE_MOVIE = 1;
+    private static final int NOT_FAVOURITE_MOVIE = 2;
     private final String  TAG = "MovieDetail";
+    private  String currentMovieId;
     private FloatingActionButton floatingActionButton;
     private AppDatabase mDb;
+    private int movieFavouriteFlag = UNDECIDED;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
+
+        mDb = AppDatabase.getsInstance(getApplicationContext());
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.movie_detail_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(" ");
+
+
+
         /* Get Movie details from the parcelable extra "movie" object */
         final Movie movie = getIntent().getParcelableExtra(MovieAdapter.EXTRA_MOVIE);
-        displayMovieDetails(movie);
+        currentMovieId = movie.getId();
 
-        mDb = AppDatabase.getsInstance(getApplicationContext());
+
+        floatingActionButton = findViewById(R.id.fab_movie_detail);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveMovieAsFavourite(movie);
+            }
+        });
+
+        displayMovieDetails(movie);
+        updateFavButton(movieFavouriteFlag);
+        setUpViewModel();
 
         /* If the device is online, try to fetch the trailers*/
         if(NetworkUtils.isOnline(this)){
@@ -65,12 +94,48 @@ public class MovieDetail extends AppCompatActivity {
             Toast.makeText(this, "Trailers and Reviews not available as your device is offline", Toast.LENGTH_SHORT).show();
         }
 
-        floatingActionButton = findViewById(R.id.fab_movie_detail);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+
+    }
+
+    private void updateFavButton(int favouriteFlag){
+        if(favouriteFlag == UNDECIDED){
+            floatingActionButton.setEnabled(false);
+        } else if(favouriteFlag == FAVOURITE_MOVIE){
+            floatingActionButton.setEnabled(true);
+            floatingActionButton.setImageResource(R.drawable.ic_favorite);
+        } else if(favouriteFlag == NOT_FAVOURITE_MOVIE){
+            floatingActionButton.setEnabled(true);
+            floatingActionButton.setImageResource(R.drawable.ic_favorite_border);
+        }
+    }
+
+
+    private void setUpViewModel() {
+        AllMoviesViewModel allMoviesViewModel = ViewModelProviders.of(this).get(AllMoviesViewModel.class);
+        allMoviesViewModel.getMovieList().observe(this, new Observer<List<Movie>>() {
             @Override
-            public void onClick(View v) {
-                //TODO: Write code here to add movie to the favourites
-                saveMovieAsFavourite(movie);
+            public void onChanged(@Nullable List<Movie> movies) {
+                if (movies != null) {
+                    Log.d(TAG,"Change triggered: Number of favourite movies is " + movies.size());
+                    boolean isFavourite = false;
+                    for(int i=0;i<movies.size();i++){
+                        if(currentMovieId.equals(movies.get(i).getId())){
+                            isFavourite = true;
+                            Log.d(TAG,"Match found for " + movies.get(i).getOriginalTitle());
+                            break;
+                        }
+                    }
+                    if(isFavourite){
+                        movieFavouriteFlag = FAVOURITE_MOVIE;
+                    } else {
+                        movieFavouriteFlag = NOT_FAVOURITE_MOVIE;
+                    }
+
+                } else {
+                    Log.d(TAG,"Change triggered: Favourite movie list is empty");
+                    movieFavouriteFlag = NOT_FAVOURITE_MOVIE;
+                }
+                updateFavButton(movieFavouriteFlag);
             }
         });
     }
@@ -83,30 +148,31 @@ public class MovieDetail extends AppCompatActivity {
                  * If it already exists then remove it from the favourites,
                  * otherwise insert it into the database.
                  */
-                int movieCount = mDb.movieDao().getMovieCount(movie.getId());
-                if(movieCount<1){
+                if(movieFavouriteFlag == NOT_FAVOURITE_MOVIE){
                     /* Add movie to the favourites */
                     mDb.movieDao().insertFavouriteMovie(movie);
                     Log.d(TAG, "Movie added to favourites");
+                    /*
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(MovieDetail.this, "Added to favourites", Toast.LENGTH_SHORT).show();
                             floatingActionButton.setImageResource(R.drawable.ic_favorite_border);
                         }
-                    });
+                    });*/
 
-                } else {
+                } else if(movieFavouriteFlag == FAVOURITE_MOVIE) {
                     /* Remove movie from the favourites */
                     mDb.movieDao().deleteFavouriteMovie(movie);
                     Log.d(TAG,"Movie removed from favourites");
+                    /*
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(MovieDetail.this, "Removed from favourites", Toast.LENGTH_SHORT).show();
                             floatingActionButton.setImageResource(R.drawable.ic_favorite);
                         }
-                    });
+                    }); */
                 }
 
             }
@@ -318,6 +384,8 @@ public class MovieDetail extends AppCompatActivity {
         TextView ratingText = findViewById(R.id.textview_rating_text);
         String stringRatingText = movie.getRating() + "/" + "10";
         ratingText.setText(stringRatingText);
+
+
     }
 
 
@@ -455,6 +523,5 @@ public class MovieDetail extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 
 }
